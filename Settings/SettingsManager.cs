@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Menu;
+using Menu.Settings;
 using Tin.Resources;
 
 public class SettingsManager : MonoBehaviour
