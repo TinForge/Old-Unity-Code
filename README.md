@@ -1,2 +1,18 @@
 # Unity-Code
-All types of code for Unity Game Engine. Util types for lerp, UI, sound. Templates for Canvas, Settings, Preferences. Structures to overlay Photon Networking. Etc
+All types of scripts for Unity Game Engine. 
+
+Util:
+  Lerp
+  Sound
+  UI
+  
+Settings:
+  Menu
+  Audio
+  Controls
+  Graphics
+ 
+ Photon:
+  Panels
+  Managers
+  Etc
