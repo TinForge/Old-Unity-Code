@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,31 +9,24 @@ using UnityEngine.UI;
 ///Override Step() in deriving classes to fade required UI elements
 public class UIElementBase: MonoBehaviour
 {
-	private CanvasGroup cg;
-
-	public bool active{ get { return cg.interactable; } }
+	public bool active{ get { return gameObject.activeSelf; } }
 
 	[HideInInspector] public bool busy;
 
 	protected float fadeInBase;
 	protected float fadeOutBase;
 
-	public virtual float fadeInBase { get; protected set; }
-
-	public virtual float fadeOutBase { get; protected set; }
-
-	protected virtual void Awake ()
+	protected virtual void EnableStep (float t)
 	{
-		cg = GetComponent<CanvasGroup> ();
+	}
 
-		fadeInBase = 1 / 0.5f;
-		fadeOutBase = 1 / 0.25f;
+	protected virtual void DisableStep (float t)
+	{
 	}
 
 	public virtual void Enable ()
 	{
-		if (active)
-			return;
+		gameObject.SetActive (true);
 		StopAllCoroutines ();
 		StartCoroutine (EnableThread ());
 	}
@@ -42,47 +35,46 @@ public class UIElementBase: MonoBehaviour
 	{
 		busy = true;
 		float t = 0;
-		Util.UI.SetAlpha (cg, 0);
+		EnableStep (0);
 
 		while (true) {
 			t += Time.deltaTime * fadeInBase;
 			if (t < 1) {
 				float a = Mathf.Lerp (0, 1, Util.LerpType.SmoothStep (t));
-				Util.UI.SetAlpha (cg, a);
+				EnableStep (t);
 				yield return null;
 			} else {
-				Util.UI.SetAlpha (cg, 1);
+				EnableStep (1);
 				break;
 			}
 		}
 		busy = false;
 	}
-public virtual void Disable ()
+
+	public virtual void Disable ()
 	{
-		if (!active)
-			return;
 		StopAllCoroutines ();
 		StartCoroutine (DisableThread ());
-
 	}
 
 	private IEnumerator DisableThread ()
 	{
 		busy = true;
 		float t = 0;
-		Util.UI.SetAlpha (cg, 1);
+		DisableStep (1);
 
 		while (true) {
 			t += Time.deltaTime * fadeOutBase;
 			if (t < 1) {
 				float a = Mathf.Lerp (1, 0, Util.LerpType.SmoothStep (t));
-				Util.UI.SetAlpha (cg, a);
+				DisableStep (a);
 				yield return null;
 			} else {
-				Util.UI.SetAlpha (cg, 0);
+				DisableStep (0);
 				break;
 			}
 		}
+		gameObject.SetActive (false);
 		busy = false;
 	}
 }
