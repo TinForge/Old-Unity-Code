@@ -3,7 +3,7 @@ using UnityEngine;
 /// MonoBehaviour initializes static values on Awake
 /// Call from anywhere to play something
 /// Intended for one static source
-public class ParticlePlayer : MonoBehaviour
+public class Particle_Singleton : MonoBehaviour
 {
 	[SerializeField]private ParticleSystem stars;
 	public static ParticleSystem Stars;

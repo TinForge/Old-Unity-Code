@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 /// MonoBehaviour initializes static values on Awake
 /// Call from anywhere to play something
 /// Intended for one static source
-public class AudioPlayer : MonoBehaviour
+public class Audio_Singleton : MonoBehaviour
 {
 	[SerializeField]private AudioClip clickUI;
 	public static AudioClip ClickUI;

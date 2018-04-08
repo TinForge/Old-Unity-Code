@@ -1,8 +1,9 @@
 using UnityEngine;
 
-/// Encapsulates Unity's player prefs
+/// Encapsulates Unity's player prefs as properties
 /// Values treated as static properties
-public class Data : MonoBehaviour
+
+public class PlayerPreferences : MonoBehaviour
 {
 	#region Ball Data
 
