@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TinForge.SceneryGenerator
-{
+namespace TinForge.SceneryGenerator {
 	[System.Serializable]
-	public class SceneryPrefab
-	{
+	public class SceneryPrefab {
 		public GameObject prefab;
 
 		public int amount;
@@ -19,30 +17,29 @@ namespace TinForge.SceneryGenerator
 		public float maxScale;
 		public float verticalOffset;
 
-		public Vector3 Bounds { get { return prefab.GetComponentInChildren<Renderer>().bounds.size; } }
+		public Vector3 Bounds { get { return prefab.GetComponentInChildren<Renderer> ().bounds.size; } }
 		public float Volume { get { return Bounds.x * Bounds.y * Bounds.z; } }
 
-
-		public SceneryPrefab()
-		{
+		public SceneryPrefab () {
 			prefab = null;
+			amount = 25;
+			alignToGround = true;
+			randomRotation = true;
 			minTilt = SceneryGenerator.minPrefabTilt;
 			maxTilt = SceneryGenerator.maxPrefabTilt;
+			randomScale = true;
 			minScale = SceneryGenerator.minPrefabScale;
 			maxScale = SceneryGenerator.maxPrefabScale;
+			verticalOffset = 0;
 		}
 	}
 
-
-
-
-	public class SceneryGenerator : MonoBehaviour
-	{
+	public class SceneryGenerator : MonoBehaviour {
 
 		//Min Max Values
 		public const int minPrefabTilt = 0;
 		public const int maxPrefabTilt = 90;
-		public const float minPrefabScale =1f;
+		public const float minPrefabScale = 1f;
 		public const float maxPrefabScale = 5f;
 		public const float maxPrefabVertical = 2f;
 
@@ -64,60 +61,51 @@ namespace TinForge.SceneryGenerator
 		public int prefabCount;
 		public SceneryPrefab[] prefabs;
 
-
 		//-----------------------
 
-		public void Generate()
-		{
+		public void Generate () {
 			if (overwrite || autogen)
-				RemoveAll();
+				RemoveAll ();
 
-				if (sortSize)
-					SortSizePrefabs();
+			if (sortSize)
+				SortSizePrefabs ();
 
-			for (int i = 0; i < prefabs.Length; i++)
-			{
+			for (int i = 0; i < prefabs.Length; i++) {
 				if (manualSeed)
-					Random.InitState(randomSeed*(i+1));
+					Random.InitState (randomSeed + i); //Reset seed for consistency between prefab setting changes
 
-				for (int j = 0; j < prefabs[i].amount; j++)
-				{
+				for (int j = 0; j < prefabs[i].amount; j++) {
 					Vector3 pos;
 					Quaternion rot;
-					RaycastPlacement(prefabs[i].alignToGround, out pos, out rot);
+					RaycastPlacement (prefabs[i].alignToGround, out pos, out rot);
 					if (pos == Vector3.zero)
 						continue;
 
-					Transform obj = PlaceScenery(prefabs[i], pos, rot);
+					Transform obj = PlaceScenery (prefabs[i], pos, rot);
 					if (prefabs[i].randomRotation)
-						RandomRotation(obj);
+						RandomRotation (obj);
 					if (prefabs[i].randomRotation)
-						RandomTilt(obj, prefabs[i].minTilt, prefabs[i].maxTilt);
+						RandomTilt (obj, prefabs[i].minTilt, prefabs[i].maxTilt);
 					if (prefabs[i].randomScale)
-						RandomScale(obj, prefabs[i].minScale, prefabs[i].maxScale, prefabs[i].verticalOffset);
+						RandomScale (obj, prefabs[i].minScale, prefabs[i].maxScale, prefabs[i].verticalOffset);
 				}
 			}
 
 		}
 
-		public void RemoveAll()
-		{
+		public void RemoveAll () {
 			for (int i = transform.childCount - 1; i >= 0; i--)
-				DestroyImmediate(transform.GetChild(i).gameObject);
+				DestroyImmediate (transform.GetChild (i).gameObject);
 		}
 
-		public void Remove(Transform group)
-		{
-			DestroyImmediate(group.gameObject);
+		public void Remove (Transform group) {
+			DestroyImmediate (group.gameObject);
 		}
 
-		public void SortSizePrefabs()
-		{
+		public void SortSizePrefabs () {
 			for (int i = 0; i < prefabs.Length; i++)
-				for (int j = 0; j < prefabs.Length; j++)
-				{
-					if (prefabs[i].Volume < prefabs[j].Volume)
-					{
+				for (int j = 0; j < prefabs.Length; j++) {
+					if (prefabs[i].Volume < prefabs[j].Volume) {
 						SceneryPrefab temp = prefabs[i];
 						prefabs[i] = prefabs[j];
 						prefabs[j] = temp;
@@ -125,54 +113,46 @@ namespace TinForge.SceneryGenerator
 				}
 		}
 
-		public void RaycastPlacement(bool align, out Vector3 pos, out Quaternion rot)
-		{
+		public void RaycastPlacement (bool align, out Vector3 pos, out Quaternion rot) {
 			Vector3 origin = transform.position + Vector3.up * raycastHeight;
-			origin = origin + new Vector3(Random.Range(-radius, radius), 0, Random.Range(-radius, radius));
+			origin = origin + new Vector3 (Random.Range (-radius, radius), 0, Random.Range (-radius, radius));
 
 			pos = Vector3.zero;
 			rot = Quaternion.identity;
 			RaycastHit hit;
 
-			if (Physics.Raycast(new Ray(origin, Vector3.down), out hit, raycastHeight))
-			{
+			if (Physics.Raycast (new Ray (origin, Vector3.down), out hit, raycastHeight)) {
 				if (!raycastAll && hit.transform != terrain)
 					return;
 
 				pos = hit.point;
 				if (align)
-					rot = Quaternion.FromToRotation(Vector3.up, hit.normal);
+					rot = Quaternion.FromToRotation (Vector3.up, hit.normal);
 			}
 		}
 
-		public Transform PlaceScenery(SceneryPrefab obj, Vector3 pos, Quaternion rot)
-		{
-			Transform parent = transform.Find(obj.prefab.name);
-			if (parent == null)
-			{
-				parent = new GameObject().transform;
+		public Transform PlaceScenery (SceneryPrefab obj, Vector3 pos, Quaternion rot) {
+			Transform parent = transform.Find (obj.prefab.name);
+			if (parent == null) {
+				parent = new GameObject ().transform;
 				parent.name = obj.prefab.name;
 				parent.transform.parent = transform;
 			}
-			return Instantiate(obj.prefab, pos, rot, parent).transform;
+			return Instantiate (obj.prefab, pos, rot, parent).transform;
 		}
 
-		public void RandomRotation(Transform obj)
-		{
-			obj.Rotate(Vector3.up * Random.Range(0, 360));
+		public void RandomRotation (Transform obj) {
+			obj.Rotate (Vector3.up * Random.Range (0, 360));
 		}
 
-		public void RandomTilt(Transform obj, float min, float max)
-		{
-			obj.Rotate(Vector3.forward * Random.Range(min, max));
+		public void RandomTilt (Transform obj, float min, float max) {
+			obj.Rotate (Vector3.forward * Random.Range (min, max));
 		}
 
-		public void RandomScale(Transform obj, float min, float max, float vRange)
-		{
-			float s = Random.Range(min, max);
-			obj.localScale = new Vector3(s, s + Random.Range(0, vRange), s);
+		public void RandomScale (Transform obj, float min, float max, float vRange) {
+			float s = Random.Range (min, max);
+			obj.localScale = new Vector3 (s, s + Random.Range (0, vRange), s);
 		}
-
 
 	}
 }
